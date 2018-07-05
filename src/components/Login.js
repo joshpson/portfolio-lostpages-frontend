@@ -3,10 +3,11 @@ import React from "react";
 class Login extends React.Component {
   login = e => {
     e.preventDefault();
-    fetch("https://portfolio-lostpages-backend.herokuapp.com/api/v1/users/1")
+    fetch("http://localhost:3000/api/v1/users/1")
       .then(res => res.json())
       .then(user => {
         this.props.setUser(user);
+        this.props.history.push("/library");
       });
   };
 

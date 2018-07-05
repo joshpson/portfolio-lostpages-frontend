@@ -1,42 +1,51 @@
 import React, { Component } from "react";
+import { Route, Switch, Redirect } from "react-router-dom";
+
+import "./App.css";
 import Login from "./components/Login";
 import Navbar from "./components/Navbar";
-import PageContainer from "./containers/PageContainer";
 import logo from "./logo.svg";
-import "./App.css";
+import GoogleApiParser from "./GoogleApiParser";
+import Library from "./components/Library";
+import Friends from "./components/Friends";
+import SearchView from "./components/SearchView";
 
 class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      page: "library",
       googleSearchResult: [],
-      user: {
-        username: null,
-        books: null,
-        lendings: null,
-        borrowings: null,
-        friends: null
-      }
+      books: [],
+      friends: [],
+      user: null
     };
   }
 
   setUser = user => {
     this.setState({
-      user: {
-        username: user.username,
-        books: user.books,
-        lendings: user.lendings,
-        borrowings: user.borrowings,
-        friends: user.friends
-      }
+      user: user,
+      books: user.books,
+      friends: user.friends
     });
   };
 
-  setPage = e => {
-    this.setState({
-      page: e.target.value
-    });
+  postBook = book => {
+    delete book["id"];
+    book["user_id"] = this.state.user.id;
+    fetch(`http://localhost:3000/api/v1/books`, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(book)
+    })
+      .then(res => res.json())
+      .then(json =>
+        this.setState({
+          books: [...this.state.books, json]
+        })
+      );
   };
 
   handleSearch = query => {
@@ -46,8 +55,7 @@ class App extends Component {
       .then(res => res.json())
       .then(googleResponse => {
         this.setState({
-          page: "search",
-          googleSearchResult: googleResponse.items
+          googleSearchResult: GoogleApiParser(googleResponse)
         });
       });
   };
@@ -55,22 +63,49 @@ class App extends Component {
   render() {
     return (
       <div className="ui container">
-        {this.state.user.username ? (
-          <div className="ui container">
-            <Navbar
-              setPage={this.setPage}
-              username={this.state.user.username}
-              handleSearch={this.handleSearch}
-            />
-            <PageContainer
-              currentPage={this.state.page}
-              user={this.state.user}
-              searchResults={this.state.googleSearchResult}
-            />
-          </div>
-        ) : (
-          <Login setUser={this.setUser} />
-        )}
+        <Route
+          render={props => {
+            return (
+              <Navbar
+                user={this.state.user}
+                handleSearch={this.handleSearch}
+                history={props.history}
+              />
+            );
+          }}
+        />
+        <Switch>
+          <Route
+            path="/login"
+            render={props => {
+              return <Login setUser={this.setUser} history={props.history} />;
+            }}
+          />
+          <Route
+            path="/library"
+            render={props => {
+              return <Library books={this.state.books} />;
+            }}
+          />
+          <Route
+            path="/friends"
+            render={props => {
+              return <Friends friends={this.state.friends} />;
+            }}
+          />
+          <Route
+            path="/search"
+            render={props => {
+              return (
+                <SearchView
+                  searchResults={this.state.googleSearchResult}
+                  addToLibrary={this.postBook}
+                  history={props.history}
+                />
+              );
+            }}
+          />
+        </Switch>
       </div>
     );
   }

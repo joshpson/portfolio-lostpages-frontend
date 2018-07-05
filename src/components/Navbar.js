@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 class Navbar extends React.Component {
   constructor(props) {
@@ -17,19 +18,32 @@ class Navbar extends React.Component {
   handleSubmit = e => {
     e.preventDefault();
     this.props.handleSearch(this.state.search);
-    e.target.reset();
+    this.setState({
+      search: ""
+    });
+    this.props.history.push("/search");
   };
 
   render() {
     return (
-      <div className="ui secondary pointing menu">
-        <span className="item">{this.props.username}</span>
-        <button className="item" value="library" onClick={this.props.setPage}>
+      <div className="ui menu">
+        {this.props.user ? (
+          <Link to="/" className="header item" value="home">
+            Lost Pages
+          </Link>
+        ) : (
+          <Link to="/login" className="header item" value="library">
+            Login
+          </Link>
+        )}
+
+        <Link to="/library" className="item" value="library">
           Library
-        </button>
-        <button className="item" value="friends" onClick={this.props.setPage}>
+        </Link>
+        <Link to="/friends" className="item" value="friends">
           Friends
-        </button>
+        </Link>
+
         <div className="right menu">
           <div className="item">
             <form
