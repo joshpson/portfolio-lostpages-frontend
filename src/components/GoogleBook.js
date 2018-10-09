@@ -3,7 +3,7 @@ import React from "react";
 const GoogleBook = props => (
   <div className="card">
     <div className="content">
-      <img src={props.book.image} className="right floated ui image" />
+      <img src={props.book.image} className="right mini floated ui image" />
       <div className="header">{props.book.title}</div>
       <div className="meta">{props.book.author}</div>
     </div>

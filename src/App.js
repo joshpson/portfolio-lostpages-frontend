@@ -87,12 +87,7 @@ class App extends Component {
               return <Library books={this.state.books} />;
             }}
           />
-          <Route
-            path="/friends"
-            render={props => {
-              return <Friends friends={this.state.friends} />;
-            }}
-          />
+
           <Route
             path="/search"
             render={props => {
